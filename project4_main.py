@@ -97,30 +97,6 @@ plotImages(augmented_images)
 
 """ Augmenting the whole dataset"""
 
-image_gen_train = ImageDataGenerator(
-      rescale=1./255,
-      rotation_range=40,
-      width_shift_range=0.2,
-      height_shift_range=0.2,
-      shear_range=0.2,
-      zoom_range=0.2,
-      horizontal_flip=True,
-      fill_mode='nearest')
-# Creating an ovject which will be applied to the dataset
-# Next applying the object (method) to the dataset to obtain
-# a new one with new prperties
-
-train_data_gen = image_gen_train.flow_from_directory(
-  batch_size=BATCH_SIZE,
-  directory=train_dir,
-  shuffle=True,
-  target_size=(IMG_SHAPE, IMG_SHAPE),
-  class_mode='binary')
-# Returns A DirectoryIterator yielding tuples of (x, y)
-# where x is a numpy array containing a batch of images with shape
-# (batch_size, *target_size, channels) and y is a numpy array
-# of corresponding labels.
-
 """Images must be formatted into appropriately pre-processed floating
 point tensors before being fed into the network. The steps involved in
 preparing these images are:
@@ -134,27 +110,55 @@ as per their RGB content
 Fortunately, all these tasks can be done using
 the class tf.keras.preprocessing.image.ImageDataGenerator.
 We can set this up in a couple of lines of code."""
-train_image_generator = ImageDataGenerator(rescale=1./255)
+
+image_gen_train = ImageDataGenerator(
+      rescale=1./255,
+      rotation_range=40,
+      width_shift_range=0.2,
+      height_shift_range=0.2,
+      shear_range=0.2,
+      zoom_range=0.2,
+      horizontal_flip=True,
+      fill_mode='nearest')
+# Creating an object which will be applied to the dataset
+# Next applying the object (method) to the dataset to obtain
+# a new one with new prperties
+
+train_data_gen = image_gen_train.flow_from_directory(
+  batch_size=BATCH_SIZE,
+  directory=train_dir,
+  shuffle=True,
+  target_size=(IMG_SHAPE, IMG_SHAPE),
+  class_mode='binary')
+# Returns a DirectoryIterator yielding tuples of (x, y)
+# where x is a numpy array containing a batch of images with shape
+# (batch_size, *target_size, channels) and y is a numpy array
+# of corresponding labels.
+
+"""Defining the validation dataset (without augmenting)"""
+
 validation_image_generator = ImageDataGenerator(rescale=1./255)
 
 """After defining our generators for training and validation
 images, flow_from_directory method will load images from the disk,
 apply rescaling, and resize them using single line of code."""
-train_data_gen = train_image_generator.flow_from_directory(
-  batch_size=BATCH_SIZE, directory=train_dir, shuffle=True,
-  target_size=(IMG_SHAPE, IMG_SHAPE), class_mode='binary')
+
 val_data_gen = validation_image_generator.flow_from_directory(
-  batch_size=BATCH_SIZE, directory=validation_dir, shuffle=False,
-  target_size=(IMG_SHAPE, IMG_SHAPE), class_mode='binary')
+  batch_size=BATCH_SIZE,
+  directory=validation_dir,
+  shuffle=True,
+  target_size=(IMG_SHAPE, IMG_SHAPE),
+  class_mode='binary')
 
 """ Visualizing Training images """
 
-sample_training_images, _ = next(train_data_gen)  # take 1 element from train_data_gen
+augmented_images = [train_data_gen[0][0][0] for i in range(5)]
+plotImages(augmented_images)
 
 
 
 # [:5] = [0:5:1] 0 and :1 are defaults
-plotImages(sample_training_images[:5])  # Plot images 0-4
+# plotImages(sample_training_images[:5])  # Plot images 0-4
 
 
 """  Define the model """
@@ -178,7 +182,11 @@ layers.append(tf.keras.layers.MaxPooling2D(2, 2))
 layers.append(tf.keras.layers.Conv2D(128, (3, 3), activation='relu'))
 layers.append(tf.keras.layers.MaxPooling2D(2, 2))
 
+layers.append(tf.keras.layers.Dropout(0.25))  # turns off 25% of nodes randomly
+
 layers.append(tf.keras.layers.Flatten())
+
+layers.append(tf.keras.layers.Dropout(0.25))
 layers.append(tf.keras.layers.Dense(512, activation='relu'))
 layers.append(tf.keras.layers.Dense(2))  # default activation is linear
 layers.append(tf.keras.layers.Dense(2, activation='softmax'))
@@ -194,7 +202,7 @@ model.compile(optimizer='adam',
 """ Model Summary """
 model.summary()
 
-EPOCHS = 50
+EPOCHS = 85
 history = model.fit_generator(
     train_data_gen,
     steps_per_epoch=int(np.ceil(total_train / float(BATCH_SIZE))),
