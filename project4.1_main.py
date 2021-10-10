@@ -211,8 +211,10 @@ layers.append(tf.keras.layers.Dropout(0.25))  # turns off 25% of nodes randomly
 
 layers.append(tf.keras.layers.Flatten())
 
-layers.append(tf.keras.layers.Dropout(0.25))
+
 layers.append(tf.keras.layers.Dense(512, activation='relu'))
+layers.append(tf.keras.layers.Dropout(0.25))
+
 layers.append(tf.keras.layers.Dense(32, activation='relu'))  # default activation is linear
 layers.append(tf.keras.layers.Dense(5, activation='softmax'))
 
