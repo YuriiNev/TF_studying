@@ -15,3 +15,4 @@ https://colab.research.google.com/github/tensorflow/examples/blob/master/courses
 
 LESSON 5 (color image recognition with NN augmentations: dogs vs cats) --> Project 4 
 https://colab.research.google.com/github/tensorflow/examples/blob/master/courses/udacity_intro_to_tensorflow_for_deep_learning/l05c01_dogs_vs_cats_without_augmentation.ipynb#scrollTo=FE7KNzPPVrVV
+Project 4 --> cat\dogs with augmentation; Project 4_1 --> flowers with augmentation - my version; Project 4_2 --> flowers with augmentation - example;
